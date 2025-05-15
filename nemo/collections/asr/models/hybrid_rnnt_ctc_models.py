@@ -481,12 +481,11 @@ class EncDecHybridRNNTCTCModel(EncDecRNNTModel, ASRBPEMixin, InterCTCMixin, ASRT
             AccessMixin.reset_registry(self)
 
         # Log items
-        self.log_dict(tensorboard_logs)
+        self.log_dict(tensorboard_logs,prog_bar=True)
 
         # Preserve batch acoustic model T and language model U parameters if normalizing
         if self._optim_normalize_joint_txu:
             self._optim_normalize_txu = [encoded_len.max(), transcript_len.max()]
-
         return {'loss': loss_value}
 
     def predict_step(self, batch, batch_idx, dataloader_idx=0):

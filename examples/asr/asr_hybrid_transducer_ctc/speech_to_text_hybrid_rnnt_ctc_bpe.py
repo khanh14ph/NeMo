@@ -69,7 +69,7 @@ from nemo.utils.trainer_utils import resolve_trainer_cfg
 
 
 @hydra_runner(
-    config_path="../conf/conformer/hybrid_transducer_ctc/", config_name="conformer_hybrid_transducer_ctc_bpe"
+    config_path="heheh", config_name="conformer_hybrid_transducer_ctc_bpe"
 )
 def main(cfg):
     logging.info(f'Hydra config: {OmegaConf.to_yaml(cfg)}')
