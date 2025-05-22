@@ -29,9 +29,8 @@ class _TokensWrapper:
         self.vocabulary = vocabulary
         self.tokenizer = tokenizer
 
-        if tokenizer is None:
-            self.reverse_map = {self.vocabulary[i]: i for i in range(len(self.vocabulary))}
 
+        self.reverse_map = {self.vocabulary[i]: i for i in range(len(self.vocabulary))}
         self.vocab_len = len(self.vocabulary)
 
         if (self.tokenizer is not None) and hasattr(self.tokenizer, 'unk_id') and self.tokenizer.unk_id is not None:
@@ -63,11 +62,10 @@ class _TokensWrapper:
     def token_to_id(self, token: str):
         if token == self.blank:
             return -1
-
-        if self.tokenizer is not None:
-            return self.tokenizer.token_to_id(token)
-        else:
-            return self.reverse_map[token]
+        # if self.tokenizer is not None:
+        #     return self.tokenizer.token_to_id(token)
+        # else:
+        return self.reverse_map[token]
 
     def text_to_tokens(self, text: str):
         if self.tokenizer is not None:
@@ -164,6 +162,7 @@ class FlashLightKenLMBeamSearchDecoder(NeuralModule):
                 word_idx = self.word_dict.get_index(word)
                 _, score = self.lm.score(start_state, word_idx)
                 for spelling in spellings:
+                    print("spelling",spelling)
                     spelling_idxs = [self.tokenizer_wrapper.token_to_id(token) for token in spelling]
                     if self.tokenizer_wrapper.unk_id in spelling_idxs:
                         print(f'tokenizer has unknown id for word[ {word} ] {spelling} {spelling_idxs}', flush=True)
@@ -216,6 +215,7 @@ class FlashLightKenLMBeamSearchDecoder(NeuralModule):
                 log_add=False,
                 criterion_type=self.criterion_type,
             )
+            print("using free lexicon decoder...")
             self.decoder = LexiconFreeDecoder(self.decoder_opts, self.lm, self.silence, self.blank, [])
 
     def _get_tokens(self, idxs: List[int]):
@@ -262,7 +262,7 @@ class FlashLightKenLMBeamSearchDecoder(NeuralModule):
             log_probs = torch.from_numpy(log_probs).float()
         if log_probs.dim() == 2:
             log_probs = log_probs.unsqueeze(0)
-
+        
         emissions = log_probs.cpu().contiguous()
 
         B, T, N = emissions.size()
@@ -273,8 +273,9 @@ class FlashLightKenLMBeamSearchDecoder(NeuralModule):
             # which is what we obtain here. Then we pass it to pybinding method which
             # is bound to the underlying C++ code
             emissions_ptr = emissions.data_ptr() + 4 * b * emissions.stride(0)
-            results = self.decoder.decode(emissions_ptr, T, N)
 
+            results = self.decoder.decode(emissions_ptr, T, N)
+            
             hypos.append(
                 [
                     {

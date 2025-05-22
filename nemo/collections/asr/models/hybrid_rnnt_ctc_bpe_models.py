@@ -438,7 +438,7 @@ class EncDecHybridRNNTCTCBPEModel(EncDecHybridRNNTCTCModel, ASRBPEMixin):
                 # Assume same decoding config as before
                 logging.info("No `decoding_cfg` passed when changing decoding strategy, using internal config")
                 decoding_cfg = self.cfg.decoding
-
+            print("decoding_cfg",decoding_cfg)
             # Assert the decoding config with all hyper parameters
             decoding_cls = OmegaConf.structured(RNNTBPEDecodingConfig)
             decoding_cls = OmegaConf.create(OmegaConf.to_container(decoding_cls))
